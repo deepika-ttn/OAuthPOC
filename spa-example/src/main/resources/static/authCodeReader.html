@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>auth code reader </title>
+</head>
+<body>
+<script type="text/javascript">
+  try {
+    var urlParams = new URLSearchParams(window.location.search);
+
+    var authCode = urlParams.get('code'),
+        state = urlParams.get('state'),
+        error = urlParams.get('error'),
+        errorDescription = urlParams.get('error_description');
+
+    if (error) {
+        var errorMsg = "The following error took place: " + error;
+        if (errorDescription) {
+            errorMsg += ". Description: " + errorDescription;
+        }
+        
+        if (window.opener && typeof window.opener.postAuthorize === 'function') {
+            window.opener.alert(errorMsg);
+        } else {
+            alert(errorMsg);
+        }
+    } else if (authCode && state) {
+        if (window.opener && typeof window.opener.postAuthorize === 'function') {
+            window.opener.postAuthorize(state, authCode);
+        } else {
+            alert("state = " + state + " , authcode = " + authCode);
+        }
+    } else {
+        var missingMsg = "Missing parameters. State: " + (state ? "present" : "missing") + ", Code: " + (authCode ? "present" : "missing");
+        if (window.opener) {
+            window.opener.alert(missingMsg);
+        } else {
+            alert(missingMsg);
+        }
+    }
+    setTimeout(function() {
+        window.close();
+    }, 100);
+  } catch (err) {
+    console.error("Error in authCodeReader:", err);
+    alert("Error processing authorization: " + err.message);
+    setTimeout(function() {
+        window.close();
+    }, 100);
+  }
+</script>
+</body>
+</html>
